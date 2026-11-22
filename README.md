@@ -14,6 +14,7 @@
 
 <p align="center">
   <a href="https://ecoloco.app"><b>Try it at ecoloco.app</b></a> ·
+  <a href="https://www.youtube.com/watch?v=nDL3nJJa9II">Watch the demo</a> ·
   <a href="ARCHITECTURE.md">How it works</a> ·
   <a href="https://ecoloco.app/docs/architecture.html">Interactive code map</a>
 </p>
@@ -32,6 +33,10 @@ EcoLoco is a phone app and website for Florida students. Scan the plants around 
 
 It's our entry for the 2026 Congressional App Challenge (FL-22). It started at the June 2026 USAII High School Hackathon as [HotCometGames/EcoLoco](https://github.com/HotCometGames/EcoLoco) and was rebuilt in October around real Florida plant data.
 
+| <img src="assets/readme/story/brazilian-pepper.jpg" alt="Brazilian pepper branch with clusters of red berries" width="250"> | <img src="assets/readme/story/coontie.jpg" alt="Coontie, a low fern-like Florida native plant" width="250"> | <img src="assets/readme/story/atala-butterfly.jpg" alt="A black Atala butterfly with blue spots and a red body, resting on coontie leaves" width="250"> |
+|:-:|:-:|:-:|
+| **Brazilian pepper** is invasive. It forms thickets that crowd out mangroves, pinelands and Everglades natives. | **Coontie** is a Florida native on the list of plants EcoLoco suggests adding to a campus. | **The Atala butterfly** lays its eggs only on coontie. It was once thought extinct in Florida. |
+
 ## Features
 
 - **Identify a plant**: take or upload up to 5 photos. Pl@ntNet names the plant, and EcoLoco says whether it's native, non-native or invasive in Florida.
@@ -43,9 +48,14 @@ It's our entry for the 2026 Congressional App Challenge (FL-22). It started at t
 
 ## How it works
 
-<img src="https://github.com/Anmol-Baranwal/Cool-GIFs-For-GitHub/assets/74038190/897cd757-ea1f-492d-aaf9-6d1674177e08" alt="" width="230" align="right">
+| <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Camera%20with%20Flash.png" alt="" width="56"> | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Magnifying%20Glass%20Tilted%20Left.png" alt="" width="56"> | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Seedling.png" alt="" width="56"> | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Envelope%20with%20Arrow.png" alt="" width="56"> |
+|:-:|:-:|:-:|:-:|
+| **1. Photograph** a plant on campus | **2. Check** it against Florida's lists | **3. Plan** what to remove and what to plant | **4. Send** the letter to your principal |
 
 Pl@ntNet, a plant identification AI, names the plant from your photos. If it isn't sure, you pick from its closest matches. Then EcoLoco checks the plant against Florida's lists in order and stops at the first one that knows it.
+
+<details>
+<summary><b>See every step of the check</b></summary>
 
 ```mermaid
 flowchart TD
@@ -64,11 +74,11 @@ flowchart TD
   usda --> result["Result"]
 ```
 
+</details>
+
 The full picture, for readers who don't code and for developers, is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Run it yourself
-
-<img src="https://user-images.githubusercontent.com/74038190/212749171-b84692a8-2b04-4e3b-93ca-ac14705da224.gif" alt="" width="230" align="right">
 
 You'll need Node.js, Python 3, an OpenAI API key, and a free PlantNet API key from https://my.plantnet.org (without it, identification falls back to OpenAI only).
 
@@ -95,11 +105,8 @@ You'll need Node.js, Python 3, an OpenAI API key, and a free PlantNet API key fr
 
 ### Try it on your phone
 
-<img src="https://github.com/Anmol-Baranwal/Cool-GIFs-For-GitHub/assets/74038190/2f72c61a-5932-491f-b3ba-d3b3470c00cb" alt="" width="90" align="right">
-
 Install the Expo Go app, run `npx expo start` from the top folder, and scan the QR code it prints. Your phone and computer need to be on the same Wi-Fi network.
 
-<br clear="right">
 
 <details>
 <summary><b>Everything the app shows, in detail</b></summary>
@@ -219,7 +226,7 @@ Each list in `backend/data/` that comes from an outside source can be rebuilt fr
 | <img src="assets/readme/logos/python.svg" alt="" width="32"> | Python | The backend's code |
 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/readme/logos/flask-dark.svg"><img src="assets/readme/logos/flask.svg" alt="" width="32"></picture> | [Flask](https://flask.palletsprojects.com) | The small web server the app sends photos and questions to |
 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/powered-by-plantnet-dark.png"><img src="assets/powered-by-plantnet-light.png" alt="" height="30"></picture> | [Pl@ntNet](https://plantnet.org) | Names the plant in your photos |
-| | [OpenAI](https://openai.com) | A backup when Pl@ntNet can't be reached, a second opinion on unsure matches, and rewording the letter's first paragraph. It never decides whether a plant is native or invasive |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="assets/readme/logos/openai-dark.png"><img src="assets/readme/logos/openai.png" alt="" width="32"></picture> | [OpenAI](https://openai.com) | A backup when Pl@ntNet can't be reached, a second opinion on unsure matches, and rewording the letter's first paragraph. It never decides whether a plant is native or invasive |
 | <img src="assets/readme/logos/githubactions.svg" alt="" width="32"> | [GitHub Actions](https://github.com/features/actions) | Runs all the tests on every change, and publishes the website when they pass |
 | <img src="assets/readme/logos/cloudflarepages.svg" alt="" width="32"> | [Cloudflare Pages](https://pages.cloudflare.com) | Hosts the website at ecoloco.app |
 | <picture><source media="(prefers-color-scheme: dark)" srcset="assets/readme/logos/render-dark.svg"><img src="assets/readme/logos/render.svg" alt="" width="32"></picture> | [Render](https://render.com) | Hosts the backend |
@@ -250,4 +257,4 @@ Each list in `backend/data/` that comes from an outside source can be rebuilt fr
 
 MIT. See [LICENSE](LICENSE).
 
-<sub>Logos from [Simple Icons](https://simpleicons.org). Animations from [Cool-GIFs-For-GitHub](https://github.com/mdazfar2/Cool-GIFs-For-GitHub). Bunny comic by [Chibird](https://chibird.com).</sub>
+<sub>Photos from iNaturalist: Brazilian pepper (c) Mary Keim, CC BY-NC-SA; coontie (c) Jenny Evans, CC BY-NC; Atala butterfly (c) Eridan Xharahi, CC BY. Icons from Microsoft Fluent Emoji and [Simple Icons](https://simpleicons.org). Bunny comic by [Chibird](https://chibird.com).</sub>
