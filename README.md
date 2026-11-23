@@ -250,7 +250,7 @@ Each list in `backend/data/` that comes from an outside source can be rebuilt fr
 ## Current limits
 
 - Plants to add are only suggested in Palm Beach County, the one county our plant list was checked for. Scanning and invasive checks work anywhere in Florida.
-- Our own native list covers 21 South Florida plants. Other plants are checked against USDA PLANTS, and a plant neither one knows is shown as unknown instead of guessed.
+- Our own native list covers 21 South Florida plants. A plant that isn't on our lists or Florida's invasive list is checked against USDA PLANTS, and if USDA doesn't know it (or can't be reached), it's shown as unknown instead of guessed.
 - The phone version runs through the Expo Go app. The website works on any phone or computer.
 - Saved audits stay on the device or browser they were made on.
 

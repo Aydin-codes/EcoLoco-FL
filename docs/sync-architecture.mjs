@@ -80,39 +80,81 @@ const STYLE = {
   svc: 'fill:#f1e4f7,stroke:#7b3fa0,color:#2e0f40', data: 'fill:#e0f4f1,stroke:#00897b,color:#00332d',
   ext: 'fill:#fde4e1,stroke:#c0392b,color:#4a0f08',
 };
-const mermaid = ['flowchart LR'];
-for (const layer of LAYERS) {
-  const ns = G.nodes.filter(n => n.layer === layer);
-  if (!ns.length) continue;
-  mermaid.push(`  subgraph L_${layer}["${TITLES[layer]}"]`, '    direction TB');
-  for (const n of ns) {
-    let label = esc(n.label);
-    if (n.status === 'planned') label += `<br/>PLANNED, goal: ${esc(n.goal)}`;
-    else if (n.status === 'dead') label += `<br/>DEAD: ${esc(n.goal)}`;
-    mermaid.push(`    ${n.id}["${label}"]`);
+// The README-sized overview: one box per file (screens, routes and outside services stay separate),
+// UI helpers and build scripts folded into whatever calls them. The full map lives in architecture.html.
+const shown = n => n.layer !== 'device' && n.id !== 'flask' && !n.file?.startsWith('backend/scripts/') &&
+  (n.layer !== 'ui' || n.file?.startsWith('frontend/screens/'));
+const groupOf = n => (n.layer === 'route' || n.layer === 'ext' || n.status !== 'live') ? n.id : n.file;
+const groups = new Map();
+for (const n of G.nodes.filter(shown)) {
+  const key = groupOf(n);
+  if (!groups.has(key)) groups.set(key, { id: 'g' + groups.size, layer: n.layer, nodes: [] });
+  groups.get(key).nodes.push(n);
+}
+const groupFor = new Map([...groups.values()].flatMap(g => g.nodes.map(n => [n.id, g])));
+const out = new Map();
+for (const e of G.edges) (out.get(e.from) ?? out.set(e.from, []).get(e.from)).push(e);
+const links = new Map();
+for (const g of groups.values()) {
+  const seen = new Set(g.nodes.map(n => n.id));
+  const stack = g.nodes.flatMap(n => (out.get(n.id) ?? []).map(e => [e, e.status === 'planned' || e.status === 'dead']));
+  while (stack.length) {
+    const [e, dashed] = stack.pop();
+    if (seen.has(e.to)) continue;
+    seen.add(e.to);
+    const target = groupFor.get(e.to);
+    if (target) {
+      if (target !== g && !(g.layer === 'ui' && target.layer === 'ui')) {
+        const key = `${g.id}>${target.id}`;
+        links.set(key, (links.get(key) ?? true) && dashed);
+      }
+    } else stack.push(...(out.get(e.to) ?? []).map(next => [next, dashed || next.status === 'planned' || next.status === 'dead']));
   }
+}
+const groupLabel = g => {
+  const n = g.nodes[0];
+  if (g.nodes.length === 1 && (n.layer === 'route' || n.layer === 'ext' || n.status !== 'live')) {
+    let label = esc(n.label);
+    if (n.status === 'planned') label += `<br/>PLANNED: ${esc(n.goal)}`;
+    else if (n.status === 'dead') label += `<br/>DEAD: ${esc(n.goal)}`;
+    return label;
+  }
+  return esc(n.file.split('/').pop());
+};
+const mermaid = ['%%{init: {"flowchart": {"nodeSpacing": 18, "rankSpacing": 45}}}%%', 'flowchart LR'];
+for (const layer of LAYERS) {
+  const gs = [...groups.values()].filter(g => g.layer === layer);
+  if (!gs.length) continue;
+  mermaid.push(`  subgraph L_${layer}["${TITLES[layer]}"]`, '    direction TB');
+  for (const g of gs) mermaid.push(`    ${g.id}["${groupLabel(g)}"]`);
   mermaid.push('  end');
 }
-for (const e of G.edges) {
-  const arrow = e.status === 'planned' || e.status === 'dead' ? '-.->' : '-->';
-  mermaid.push(`  ${e.from} ${arrow}|"${esc(e.label)}"| ${e.to}`);
+for (const [key, dashed] of links) {
+  const [from, to] = key.split('>');
+  mermaid.push(`  ${from} ${dashed ? '-.->' : '-->'} ${to}`);
 }
 for (const layer of LAYERS) mermaid.push(`  classDef ${layer} ${STYLE[layer]}`);
 mermaid.push('  classDef planned stroke-dasharray:6 4,stroke-width:2px', '  classDef dead fill:#f3f3f3,stroke:#9e9e9e,color:#616161,stroke-dasharray:3 3');
 for (const layer of LAYERS) {
-  const list = G.nodes.filter(n => n.layer === layer).map(n => n.id);
+  const list = [...groups.values()].filter(g => g.layer === layer).map(g => g.id);
   if (list.length) mermaid.push(`  class ${list.join(',')} ${layer}`);
 }
 for (const s of ['planned', 'dead']) {
-  const list = G.nodes.filter(n => n.status === s).map(n => n.id);
+  const list = [...groups.values()].filter(g => g.nodes.some(n => n.status === s)).map(g => g.id);
   if (list.length) mermaid.push(`  class ${list.join(',')} ${s}`);
 }
 
 const cell = s => String(s).replace(/\|/g, '\\|');
+const rows = new Map();
+for (const n of G.nodes.filter(n => n.goal)) {
+  const status = n.status === 'live' ? 'change planned' : n.status.toUpperCase();
+  const key = `${status}\n${n.file ?? ''}\n${n.goal}`;
+  (rows.get(key) ?? rows.set(key, { status, file: n.file, goal: n.goal, labels: [] }).get(key)).labels.push(n.label);
+}
 const planned = [
   '| Item | Status | Goal |', '|---|---|---|',
-  ...G.nodes.filter(n => n.goal).map(n =>
-    `| \`${n.label}\`${n.file ? ` (${n.file})` : ''} | ${n.status === 'live' ? 'change planned' : n.status.toUpperCase()} | ${cell(n.goal)} |`),
+  ...[...rows.values()].map(r =>
+    `| ${r.labels.map(l => `\`${l}\``).join(', ')}${r.file ? ` (${r.file})` : ''} | ${r.status} | ${cell(r.goal)} |`),
 ];
 
 const block = (name, body) => `<!-- GENERATED:${name} -->\n${body}\n<!-- /GENERATED:${name} -->`;
