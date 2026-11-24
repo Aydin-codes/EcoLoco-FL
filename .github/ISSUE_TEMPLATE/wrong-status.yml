@@ -1,0 +1,44 @@
+name: Wrong plant status
+description: EcoLoco says a plant is native, invasive or unknown, and a source says otherwise.
+title: "Wrong status: "
+labels: ["plant data"]
+body:
+  - type: input
+    id: plant
+    attributes:
+      label: Plant
+      description: The name EcoLoco showed, and the scientific name if you know it.
+      placeholder: Mexican petunia (Ruellia simplex)
+    validations:
+      required: true
+  - type: dropdown
+    id: shown
+    attributes:
+      label: What EcoLoco said
+      options: [Native, Non-native, Invasive, Unknown]
+    validations:
+      required: true
+  - type: dropdown
+    id: correct
+    attributes:
+      label: What it should be
+      options: [Native, Non-native, Invasive, Not sure]
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: A link that shows the correct status, such as the FISC list, USF Atlas of Florida Plants, or UF/IFAS.
+    validations:
+      required: true
+  - type: input
+    id: county
+    attributes:
+      label: Florida county
+      description: Optional. Where you found the plant.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Optional. A screenshot helps.

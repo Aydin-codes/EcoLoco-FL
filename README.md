@@ -4,7 +4,7 @@
 
 <h1 align="center">EcoLoco</h1>
 
-<p align="center">Find the plants hurting your campus, and plan which Florida natives to grow instead.</p>
+<p align="center">Find the plants hurting your yard, and plan which native plants to grow instead.</p>
 
 <p align="center">
   <a href="https://github.com/Aydin-codes/EcoLoco-FL/actions/workflows/deploy-pages.yml"><img src="https://github.com/Aydin-codes/EcoLoco-FL/actions/workflows/deploy-pages.yml/badge.svg" alt="Tests and website deploy status"></a>
@@ -255,6 +255,10 @@ Each list in `backend/data/` that comes from an outside source can be rebuilt fr
 - Saved audits stay on the device or browser they were made on.
 
 <p align="center"><img src="https://user-images.githubusercontent.com/74038190/236544207-c4f427b3-be04-4cfe-a3d2-2eabb0d2de73.gif" alt="A pink bunny comic: progress isn't linear, it's okay if you get stuck or fall back, just keep moving forward" width="280"></p>
+
+## Contributing
+
+Found a plant with the wrong status, or a bug? [Open an issue](https://github.com/Aydin-codes/EcoLoco-FL/issues/new/choose). Pull requests are welcome; [CONTRIBUTING.md](CONTRIBUTING.md) has the rules for plant data and tests. Please report security problems privately, as [SECURITY.md](SECURITY.md) explains.
 
 ## License
 
