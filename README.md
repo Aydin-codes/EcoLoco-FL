@@ -53,7 +53,7 @@ It's our entry for the 2026 Congressional App Challenge (FL-22). It started at t
 
 | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Camera%20with%20Flash.png" alt="" width="56"> | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Magnifying%20Glass%20Tilted%20Left.png" alt="" width="56"> | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Seedling.png" alt="" width="56"> | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Envelope%20with%20Arrow.png" alt="" width="56"> |
 |:-:|:-:|:-:|:-:|
-| **1. Photograph** a plant on campus | **2. Check** it against Florida's lists | **3. Plan** what to remove and what to plant | **4. Send** the letter to your principal |
+| **1. Photograph** a plant | **2. Check** it against Florida's lists | **3. Plan** what to remove and what to plant | **4. Send** the letter to your principal |
 
 Pl@ntNet, a plant identification AI, names the plant from your photos. If it isn't sure, you pick from its closest matches. Then EcoLoco checks the plant against Florida's lists in order and stops at the first one that knows it.
 
