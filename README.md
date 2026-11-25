@@ -32,7 +32,7 @@
 
 ## What it is
 
-EcoLoco is a phone app and website for Florida students. Scan the plants around your school and it tells you which ones are native, which are invasive, and where each answer comes from. Then it builds a plan to swap invasive plants for Florida natives and drafts a letter to your principal.
+EcoLoco is a phone app and website that tells you whether a plant is native, non-native or invasive, and shows the official source each answer came from. Check one plant or scan a whole yard, park or campus, and it builds a plan to swap invasive plants for native ones and drafts a letter you can send to whoever looks after the place.
 
 It's our entry for the 2026 Congressional App Challenge (FL-22). It started at the June 2026 USAII High School Hackathon as [HotCometGames/EcoLoco](https://github.com/HotCometGames/EcoLoco) and was rebuilt in October around real Florida plant data.
 
