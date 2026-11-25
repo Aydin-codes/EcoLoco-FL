@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from services.ai_service import choose_plant, generate_letter, identify_plant
+from services.ask_service import ask_about_plant
 from services.location_service import geocode, plantings_checked, reverse_zip, round_coords, seen_near, zip_center
 from services.name_search import common_name_for, is_known, search
 from services.plan_service import build_plan
@@ -34,6 +35,7 @@ RATE_LIMITS = {
     "/locate": [(20, MINUTE)],
     "/nearby": [(30, MINUTE)],
     "/letter": [(10, MINUTE), (100, HOUR)],
+    "/ask": [(20, MINUTE), (200, HOUR)],
 }
 TOO_MANY = "Too many requests right now. Wait a minute and try again."
 
@@ -256,6 +258,22 @@ def letter():
     plan = dict(plan, add=[card for card in plan["add"] if card.get("in_letter") is not False])
     result, ai_unavailable = generate_letter(plan, zip_code)
     return jsonify({"result": result, "ai_unavailable": ai_unavailable})
+
+
+BAD_QUESTION = "Type a question between 3 and 200 characters."
+
+
+@app.route("/ask", methods=["POST"])
+def ask():
+    data = request.get_json() or {}
+    name, question, location = data.get("scientific_name"), data.get("question"), data.get("location")
+    if not isinstance(name, str) or not name.strip() or len(name) > 100 or not location:
+        return jsonify({"error": "scientific_name, question and location are required"}), 400
+    if not is_florida_zip(location):
+        return jsonify({"error": FLORIDA_ONLY}), 400
+    if not isinstance(question, str) or not 3 <= len(question.strip()) <= 200:
+        return jsonify({"error": BAD_QUESTION}), 400
+    return jsonify({"result": ask_about_plant(name.strip(), question.strip(), location)})
 
 
 if __name__ == "__main__":

@@ -6,7 +6,9 @@
     "grass", "hawk", "heron", "hummingbird", "insect", "larva", "larvae", "lizard", "manatee", "moth", "oak",
     "opossum", "owl", "palm", "panther", "pine", "plant", "pollinator", "rabbit", "raccoon", "shrub", "snake",
     "spider", "squirrel", "toad", "tortoise", "tree", "turkey", "turtle", "vine", "wasp", "weed", "wildflower",
-    "woodpecker", "worm"
+    "woodpecker", "worm",
+    "alligator", "cat", "chicken", "cow", "dog", "goat", "horse", "iguana", "mice", "mosquito", "mouse", "parrot",
+    "pig", "rat", "sheep", "slug", "snail", "tick"
   ],
   "endings": ["bird", "birds", "fly", "flies", "berry", "berries", "weed", "weeds", "wort", "grass", "wood", "worm", "worms"]
 }
