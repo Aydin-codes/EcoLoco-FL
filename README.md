@@ -19,6 +19,8 @@
   <a href="https://ecoloco.app/docs/architecture.html">Interactive code map</a>
 </p>
 
+<p align="center">If you find EcoLoco useful, please give it a star ⭐</p>
+
 <p align="center">
   <img src="assets/readme/home.png" alt="EcoLoco home screen: Find out what's harming your campus, with buttons to start a campus scan or identify one plant" width="200">
   <img src="assets/readme/identify.png" alt="Identify result: Sprenger's asparagus-fern, 93 percent match, marked Invasive with its source" width="200">
