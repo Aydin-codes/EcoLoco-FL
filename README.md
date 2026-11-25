@@ -32,7 +32,7 @@
 
 ## What it is
 
-EcoLoco is a phone app and website that tells you whether a plant is native, non-native or invasive, and shows the official source each answer came from. Check one plant or scan a whole yard, park or campus, and it builds a plan to swap invasive plants for native ones and drafts a letter you can send to whoever looks after the place.
+EcoLoco is a phone app and website that tells you whether a plant is native, non-native or invasive, and shows the official source each answer came from. Check one plant or scan a whole yard, park or campus, and it builds a plan to swap invasive plants for native ones and drafts a letter asking for the change.
 
 | <img src="assets/readme/story/brazilian-pepper.jpg" alt="Brazilian pepper branch with clusters of red berries" width="250"> | <img src="assets/readme/story/coontie.jpg" alt="Coontie, a low fern-like Florida native plant" width="250"> | <img src="assets/readme/story/atala-butterfly.jpg" alt="A black Atala butterfly with blue spots and a red body, resting on coontie leaves" width="250"> |
 |:-:|:-:|:-:|
@@ -40,20 +40,20 @@ EcoLoco is a phone app and website that tells you whether a plant is native, non
 
 ## Features
 
-- **Identify a plant**: take or upload up to 5 photos. Pl@ntNet names the plant, and EcoLoco says whether it's native, non-native or invasive in Florida.
-- **Scan your campus**: add one card per plant, scan them all at once, and see what share of your campus is native, counted by kind of plant and by every plant.
-- **Get a plan**: a removal card with safety notes for each invasive plant found, and native plants to add, checked for Palm Beach County.
-- **Draft a letter**: an editable letter to your principal, built from your plan, with sources.
-- **Save audits**: keep separate audits for different campuses on your device.
-- **Every answer has a source**: the Florida Invasive Species Council 2026 list (179 plants), USDA PLANTS (5,322 Florida plants) and the USF Atlas of Florida Plants. AI never decides whether a plant is native or invasive.
+- **Answers come from official lists**: AI only names the plant from your photos. Whether it's native or invasive comes from official lists, and each answer shows its source.
+- **Identify a plant**: take or upload up to 5 photos. Pl@ntNet names the plant, and EcoLoco says whether it's native, non-native or invasive.
+- **Scan an area**: add one card per plant, scan them all at once, and see what share of the area is native, counted by kind of plant and by every plant.
+- **Get a plan**: a removal card with safety notes for each invasive plant found, and native plants to add, each checked against its sources.
+- **Draft a letter**: an editable letter built from your plan, with sources, asking for the change.
+- **Save audits**: keep separate audits for different areas on your device.
 
 ## How it works
 
 | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Camera%20with%20Flash.png" alt="" width="56"> | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Magnifying%20Glass%20Tilted%20Left.png" alt="" width="56"> | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Seedling.png" alt="" width="56"> | <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Envelope%20with%20Arrow.png" alt="" width="56"> |
 |:-:|:-:|:-:|:-:|
-| **1. Photograph** a plant on campus | **2. Check** it against Florida's lists | **3. Plan** what to remove and what to plant | **4. Send** the letter to your principal |
+| **1. Photograph** a plant | **2. Check** it against official lists | **3. Plan** what to remove and what to plant | **4. Send** the letter |
 
-Pl@ntNet, a plant identification AI, names the plant from your photos. If it isn't sure, you pick from its closest matches. Then EcoLoco checks the plant against Florida's lists in order and stops at the first one that knows it.
+Pl@ntNet, a plant identification AI, names the plant from your photos. If it isn't sure, you pick from its closest matches. Then EcoLoco checks the plant against official lists in order and stops at the first one that knows it. If none of them do, it says so instead of guessing.
 
 <details>
 <summary><b>See every step of the check</b></summary>
@@ -242,15 +242,17 @@ Each list in `backend/data/` that comes from an outside source can be rebuilt fr
 | What does it help, and how do you grow it? | [Natives for Your Neighborhood](https://www.regionalconservation.org/beta/nfyn/) from the Institute for Regional Conservation, and [UF/IFAS](https://gardeningsolutions.ifas.ufl.edu) |
 | Which plants feed the most caterpillars? | [National Wildlife Federation](https://www.nwf.org/Garden-for-Wildlife/About/Native-Plants/keystone-plants-by-ecoregion) keystone plants for South Florida |
 | Is it safe around pets? | [ASPCA](https://www.aspca.org/pet-care/animal-poison-control/toxic-and-non-toxic-plants) |
-| What grows near your school? | [iNaturalist](https://www.inaturalist.org), within about 5 km |
-| Where is your school? | [OpenStreetMap](https://www.openstreetmap.org) and the 2020 Census |
+| What grows near you? | [iNaturalist](https://www.inaturalist.org), within about 5 km |
+| Where are you? | [OpenStreetMap](https://www.openstreetmap.org) and the 2020 Census |
 
 ## Current limits
 
+- Florida only for now: the invasive and native checks use Florida's official lists. Adding another state means adding that state's lists.
 - Plants to add are only suggested in Palm Beach County, the one county our plant list was checked for. Scanning and invasive checks work anywhere in Florida.
 - Our own native list covers 21 South Florida plants. A plant that isn't on our lists or Florida's invasive list is checked against USDA PLANTS, and if USDA doesn't know it (or can't be reached), it's shown as unknown instead of guessed.
 - The phone version runs through the Expo Go app. The website works on any phone or computer.
 - Saved audits stay on the device or browser they were made on.
+- The letter is written for a school principal.
 
 <p align="center"><img src="https://user-images.githubusercontent.com/74038190/236544207-c4f427b3-be04-4cfe-a3d2-2eabb0d2de73.gif" alt="A pink bunny comic: progress isn't linear, it's okay if you get stuck or fall back, just keep moving forward" width="280"></p>
 
