@@ -27,4 +27,5 @@ def _patterns():
 
 def mentions_new_names(text, allowed):
     text, allowed = text.lower(), allowed.lower()
-    return any(m.group(0) not in allowed for p in _patterns() for m in p.finditer(text))
+    return any(not re.search(r"\b%s\b" % re.escape(m.group(0)), allowed)
+               for p in _patterns() for m in p.finditer(text))

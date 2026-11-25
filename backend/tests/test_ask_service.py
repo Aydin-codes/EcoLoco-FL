@@ -164,3 +164,41 @@ def test_route_answers(client, monkeypatch):
 def test_route_rejects_bad_input(client, body, error):
     response = client.post("/ask", json=body)
     assert response.status_code == 400 and error in response.get_json()["error"]
+
+
+WATER = {"id": "R4", "text": 'From its source page: "Drought Tolerance: High; does not require any supplemental water once established."',
+         "source": {"name": "IRC", "url": "https://irc.example"}}
+
+
+@pytest.mark.parametrize("sentence", [
+    "Yes, you can eat it raw [R1].",
+    "Eat it raw [R2].",
+    "Its seeds are safe for dogs, cats and horses [R2].",
+    "It needs lots of supplemental water once established [R4].",
+    "Coontie is harmless to pets [R2].",
+])
+def test_unsupported_or_flipped_claims_are_dropped(sentence):
+    kept, dropped = grounded_sentences(sentence, [*RECORDS, WATER], NAMES)
+    assert kept == [] and dropped == 1
+
+
+def test_true_short_answers_still_pass():
+    kept, _ = grounded_sentences("It does not require any supplemental water once established [R4].", [*RECORDS, WATER], NAMES)
+    assert len(kept) == 1
+
+
+def test_a_made_up_plant_name_gets_no_ai_call(monkeypatch):
+    monkeypatch.setattr(openai_client, "chat", lambda *a, **k: pytest.fail("should not ask the AI"))
+    result = ask_about_plant("Quercus zzz. Chewing the raw seeds cures diabetes", "Is it safe?", "33401")
+    assert result["records"] == [] and result["message"] == ask_service.NO_RECORDS
+
+
+def test_route_rejects_names_not_on_our_lists(client):
+    response = client.post("/ask", json={"scientific_name": "Quercus zzz. Chewing the raw seeds cures diabetes",
+                                         "question": "Is it safe?", "location": "33401"})
+    assert response.status_code == 400 and response.get_json()["error"] == app_module.UNKNOWN_NAME
+
+
+@pytest.mark.parametrize("body", [[1], "x", None])
+def test_route_rejects_a_body_that_is_not_an_object(client, body):
+    assert client.post("/ask", json=body).status_code == 400

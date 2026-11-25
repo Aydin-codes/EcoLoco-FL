@@ -23,3 +23,8 @@ def test_new_names_are_caught(text, allowed):
 ])
 def test_known_or_harmless_text_passes(text, allowed):
     assert mentions_new_names(text, allowed) is False
+
+
+def test_short_animal_hidden_inside_a_longer_word_is_still_new():
+    assert mentions_new_names("A cat can eat it.", "Caterpillars eat its leaves.") is True
+    assert mentions_new_names("Caterpillars eat its leaves.", "Caterpillars eat its leaves.") is False

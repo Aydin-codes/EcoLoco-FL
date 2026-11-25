@@ -1,11 +1,21 @@
+import ipaddress
 import math
 import threading
 import time
-from collections import deque
+from collections import OrderedDict, deque
 
-_hits = {}
+MAX_KEYS = 5000
+_hits = OrderedDict()
 _lock = threading.Lock()
-_DAY = 24 * 60 * 60
+
+
+def visitor_key(address):
+    try:
+        ip = ipaddress.ip_address(address)
+    except ValueError:
+        return address or "unknown"
+    # One IPv6 visitor usually controls a whole /64, so count the block, not each address.
+    return str(ipaddress.ip_network(f"{ip}/64", strict=False)) if ip.version == 6 else str(ip)
 
 
 def retry_after(key, rules, now=None):
@@ -13,6 +23,7 @@ def retry_after(key, rules, now=None):
     longest = max(window for _, window in rules)
     with _lock:
         hits = _hits.setdefault(key, deque())
+        _hits.move_to_end(key)
         while hits and now - hits[0] >= longest:
             hits.popleft()
         for limit, window in rules:
@@ -20,7 +31,6 @@ def retry_after(key, rules, now=None):
             if len(inside) >= limit:
                 return max(1, math.ceil(window - (now - inside[-limit])))
         hits.append(now)
-        if len(_hits) > 5000:
-            for stale in [k for k, v in _hits.items() if not v or now - v[-1] >= _DAY]:
-                del _hits[stale]
+        while len(_hits) > MAX_KEYS:
+            _hits.popitem(last=False)
     return None

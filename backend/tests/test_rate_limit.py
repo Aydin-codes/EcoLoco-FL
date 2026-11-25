@@ -47,11 +47,33 @@ def test_keys_are_separate():
     assert retry_after("b", rules, now=0) is None
 
 
-def test_old_keys_are_dropped_when_many_build_up(monkeypatch):
-    for i in range(5001):
-        rate_limit._hits[("old", i)] = rate_limit.deque([0.0])
-    retry_after("new", [(1, 60)], now=2 * 24 * 60 * 60)
-    assert list(rate_limit._hits) == ["new"]
+def test_least_recently_seen_visitors_are_dropped_past_the_cap(monkeypatch):
+    monkeypatch.setattr(rate_limit, "MAX_KEYS", 3)
+    for key in ("a", "b", "c"):
+        retry_after(key, [(5, 60)], now=0)
+    retry_after("a", [(5, 60)], now=1)
+    retry_after("d", [(5, 60)], now=2)
+    assert list(rate_limit._hits) == ["c", "a", "d"]
+
+
+def test_ipv6_visitors_are_counted_by_their_64_block():
+    assert rate_limit.visitor_key("2001:db8:0:1::1") == rate_limit.visitor_key("2001:db8:0:1::ffff")
+    assert rate_limit.visitor_key("2001:db8:0:1::1") != rate_limit.visitor_key("2001:db8:0:2::1")
+    assert rate_limit.visitor_key("203.0.113.7") == "203.0.113.7"
+    assert rate_limit.visitor_key(None) == "unknown"
+
+
+def test_new_ipv6_addresses_in_one_block_share_a_limit(client):
+    for i in range(20):
+        client.post("/locate", json={}, headers={"CF-Connecting-IP": f"2001:db8::{i + 1:x}"})
+    assert client.post("/locate", json={}, headers={"CF-Connecting-IP": "2001:db8::abcd"}).status_code == 429
+
+
+def test_ask_has_a_cap_for_everyone_together(client, monkeypatch):
+    monkeypatch.setitem(app_module.EVERYONE_LIMITS, "/ask", [(2, 60)])
+    for i in range(2):
+        client.post("/ask", json={}, headers={"CF-Connecting-IP": f"203.0.113.{i}"})
+    assert client.post("/ask", json={}, headers={"CF-Connecting-IP": "203.0.113.9"}).status_code == 429
 
 
 def test_route_returns_429_with_retry_after(client):

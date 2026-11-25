@@ -11,7 +11,7 @@ from services.ask_service import ask_about_plant
 from services.location_service import geocode, plantings_checked, reverse_zip, round_coords, seen_near, zip_center
 from services.name_search import common_name_for, is_known, search
 from services.plan_service import build_plan
-from services.rate_limit import retry_after
+from services.rate_limit import retry_after, visitor_key
 
 load_dotenv()
 
@@ -25,7 +25,7 @@ def debug_enabled():
     return os.getenv("ECOLOCO_DEV") == "1"
 
 
-MINUTE, HOUR = 60, 60 * 60
+MINUTE, HOUR, DAY = 60, 60 * 60, 24 * 60 * 60
 RATE_LIMITS = {
     "/identify": [(30, MINUTE), (300, HOUR)],
     "/choose": [(60, MINUTE)],
@@ -37,12 +37,13 @@ RATE_LIMITS = {
     "/letter": [(10, MINUTE), (100, HOUR)],
     "/ask": [(20, MINUTE), (200, HOUR)],
 }
+EVERYONE_LIMITS = {"/ask": [(1000, DAY)]}
 TOO_MANY = "Too many requests right now. Wait a minute and try again."
 
 
 def _client_ip():
     # Render sits behind Cloudflare, which overwrites this header with the visitor's real address.
-    return request.headers.get("CF-Connecting-IP") or request.remote_addr or "unknown"
+    return visitor_key(request.headers.get("CF-Connecting-IP") or request.remote_addr)
 
 
 @app.before_request
@@ -51,6 +52,8 @@ def limit_requests():
     if request.method == "OPTIONS" or not rules:
         return None
     wait = retry_after((request.path, _client_ip()), rules)
+    if wait is None and request.path in EVERYONE_LIMITS:
+        wait = retry_after((request.path, "everyone"), EVERYONE_LIMITS[request.path])
     if wait is None:
         return None
     return jsonify({"error": TOO_MANY}), 429, {"Retry-After": str(wait)}
@@ -265,12 +268,15 @@ BAD_QUESTION = "Type a question between 3 and 200 characters."
 
 @app.route("/ask", methods=["POST"])
 def ask():
-    data = request.get_json() or {}
+    data = request.get_json(silent=True)
+    data = data if isinstance(data, dict) else {}
     name, question, location = data.get("scientific_name"), data.get("question"), data.get("location")
     if not isinstance(name, str) or not name.strip() or len(name) > 100 or not location:
         return jsonify({"error": "scientific_name, question and location are required"}), 400
     if not is_florida_zip(location):
         return jsonify({"error": FLORIDA_ONLY}), 400
+    if not is_known(name.strip()):
+        return jsonify({"error": UNKNOWN_NAME}), 400
     if not isinstance(question, str) or not 3 <= len(question.strip()) <= 200:
         return jsonify({"error": BAD_QUESTION}), 400
     return jsonify({"result": ask_about_plant(name.strip(), question.strip(), location)})

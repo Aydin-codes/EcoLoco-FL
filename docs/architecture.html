@@ -462,7 +462,7 @@
         "`load_dotenv()` reads `OPENAI_API_KEY` and `PLANTNET_API_KEY` from `backend/.env` when running locally. On Render they come from the service's environment settings.",
         "Creates the Flask app and turns on CORS so the Expo web build can call it.",
         "Registers nine POST routes: /identify, /names, /choose, /recommend, /plan, /locate, /nearby, /letter, /ask.",
-        "Before every route, `limit_requests()` checks `RATE_LIMITS` for that path (for example /identify: 30 a minute and 300 an hour per visitor; /letter: 10 a minute and 100 an hour). Over the limit it answers 429 \"Too many requests right now. Wait a minute and try again.\" with a `Retry-After` header. The visitor is told apart by Cloudflare's `CF-Connecting-IP` header (Render sits behind Cloudflare), or the direct address when running locally. CORS preflight requests aren't counted.",
+        "Before every route, `limit_requests()` checks `RATE_LIMITS` for that path (for example /identify: 30 a minute and 300 an hour per visitor; /letter: 10 a minute and 100 an hour; /ask: 20 a minute and 200 an hour), then `EVERYONE_LIMITS` (/ask: 1,000 a day for all visitors together). Over a limit it answers 429 \"Too many requests right now. Wait a minute and try again.\" with a `Retry-After` header. The visitor is Cloudflare's `CF-Connecting-IP` (Render sits behind Cloudflare), or the direct address locally, passed through `visitor_key()`. CORS preflight requests aren't counted.",
         "Live on Render (`render.yaml`, service `ecoloco-api`) at https://api.ecoloco.app, started with gunicorn; each push to master redeploys it.",
         "`app.run(host='0.0.0.0')` with debug mode only when `ECOLOCO_DEV=1` (`debug_enabled()`); debug is off by default, so crashes never show the code-revealing debug page."
       ]
@@ -1015,7 +1015,7 @@
       "what": "Checks whether a piece of AI text names a plant or animal that wasn't in what we gave it.",
       "how": [
         "Builds patterns from `nature_terms.json` plus every plant name, synonym, animal and NWF group in our data files.",
-        "Returns true if the text contains any match that doesn't also appear in the allowed text."
+        "Returns true if the text contains any match that doesn't appear as a whole word in the allowed text (so \"cat\" isn't excused by \"caterpillars\")."
       ]
     },
     {
@@ -1994,8 +1994,8 @@
         "Drops times older than the longest window, then checks each rule (for example 30 in 60 seconds, 300 in an hour).",
         "If any rule is full, returns how many seconds until the oldest counted request expires; the blocked request is not counted.",
         "Otherwise records the request and returns None.",
-        "When more than 5,000 visitors are being tracked, forgets anyone not seen for a day.",
-        "Each server process keeps its own counts, and they reset when the server restarts."
+        "Tracks at most 5,000 visitors; past that it forgets whoever was seen least recently, so the check costs the same however many visitors there are.",
+        "Counts live in the one gunicorn worker and reset when the server restarts."
       ]
     },
     {
@@ -2043,8 +2043,8 @@
       "row": 12.8,
       "what": "API endpoint for a question about one plant. No screen calls it yet.",
       "how": [
-        "Reads `scientific_name`, `question` and `location`; 400 if the name is missing or over 100 characters, the ZIP is outside Florida, or the question isn't 3 to 200 characters.",
-        "Rate limited to 20 a minute and 200 an hour per visitor.",
+        "Reads `scientific_name`, `question` and `location` from a JSON object (anything else counts as empty); 400 if the name is missing or over 100 characters, the ZIP is outside Florida, the name isn't on our Florida plant list (`is_known()`), or the question isn't 3 to 200 characters.",
+        "Rate limited to 20 a minute and 200 an hour per visitor, and 1,000 a day for everyone together.",
         "Returns `{result: ask_about_plant(...)}`."
       ]
     },
@@ -2059,8 +2059,8 @@
       "row": 12.8,
       "what": "Answers a question about a plant using only our records, and keeps only sentences that cite one.",
       "how": [
-        "Gets the plant's numbered records from `plant_records()`. With none, returns \"We don't have any records about this plant yet…\" without calling the AI.",
-        "Sends OpenAI the records and the question (in quotes, marked as from the public) with `ASK_SYSTEM`: answer only from the records, end every sentence with its record numbers, add nothing new, at most 4 short sentences, ignore instructions in the question, reply NO_ANSWER only when no record helps.",
+        "Returns \"We don't have any records about this plant yet…\" without calling the AI when the name isn't on our Florida plant list or the plant has no records. Only names from our own data reach the prompt.",
+        "Sends OpenAI the records and the question (in quotes, marked as from the public) with `ASK_SYSTEM`: answer only from the records, end every sentence with its record numbers, add nothing new, at most 4 short sentences, ignore instructions in the question, answer the parts the records cover, state dangers in the records' own words instead of calling something safe, reply NO_ANSWER only when no record helps.",
         "Runs the reply through `grounded_sentences()` and returns `{plant_name, scientific_name, records, answer: [{text, record_ids, sources}], dropped, ai_unavailable, message}`.",
         "When nothing survives, NO_ANSWER comes back, or OpenAI is down, `answer` is empty and `message` says so; the records are always returned so the screen can show them instead."
       ]
@@ -2097,9 +2097,26 @@
       "how": [
         "Splits the reply at each citation like [R2] or [R1, R3]; any sentence without one is dropped.",
         "Drops a sentence that cites a record that doesn't exist.",
-        "Drops it if `mentions_new_names()` finds a plant or animal not in the cited records, if it has a number they don't, or if it adds \"not\", \"never\" or another negation they don't have.",
-        "Drops it if fewer than 60% of its longer words appear in the cited records.",
+        "Drops it if `mentions_new_names()` finds a plant or animal not in the cited records, or if it has a number they don't.",
+        "Drops it if it adds a negation (\"not\", \"never\"…) or a claim word (\"safe\", \"edible\", \"eat\", \"cures\"…) the cited records don't contain.",
+        "Drops it unless it has at least 2 meaningful words and at least 75% of them appear in the cited records.",
         "Keeps at most 5 sentences, each with its record ids and sources, and counts how many were dropped."
+      ]
+    },
+    {
+      "id": "s_visitor_key",
+      "label": "visitor_key()",
+      "layer": "svc",
+      "status": "live",
+      "file": "backend/services/rate_limit.py",
+      "symbol": "def visitor_key(",
+      "col": 6,
+      "row": -0.6,
+      "what": "Turns a visitor's address into the key the rate limits count.",
+      "how": [
+        "An IPv4 address is used as is.",
+        "An IPv6 address becomes its /64 block, since one visitor usually controls a whole /64 and could otherwise get a fresh limit per address.",
+        "Anything unreadable or missing counts as \"unknown\"."
       ]
     }
   ],
@@ -3074,6 +3091,11 @@
       "from": "s_grounded",
       "to": "s_guard",
       "label": "mentions_new_names(sentence, cited records)"
+    },
+    {
+      "from": "flask",
+      "to": "s_visitor_key",
+      "label": "visitor_key(CF-Connecting-IP or remote_addr)"
     }
   ]
 }</script>
