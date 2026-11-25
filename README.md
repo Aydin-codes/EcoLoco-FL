@@ -183,6 +183,8 @@ The invasive list is generated straight from the official FISC PDF by a script i
 
 **How the recommended plants were checked.** Each of the 30 plants the app can recommend was looked up by hand in the USF Atlas of Florida Plants (https://florida.plantatlas.usf.edu) to confirm it's native to Palm Beach County, and its facts and its "replaces" pairing were checked against their sources. Who checked each plant, and when, is recorded in `docs/plant-checklist-verified.csv`. A plant that hasn't passed this check is never recommended. Tropical sage was taken off the list after its Atlas page showed it isn't native.
 
+**Checking it again automatically.** A script re-reads every source and writes [docs/fact-check-report.md](docs/fact-check-report.md). It confirms each quoted line is on its source page word for word, that every link still opens, and that the USF Atlas lists the plant as native in Palm Beach County. Facts written in our own words can't be matched word for word, so it only checks that the animals and numbers they mention are on the source page, and a person still reads those. Run it from the `backend` folder with `venv\Scripts\python scripts/check_facts.py data/fl_recommendations.json ../docs/fact-check-report.md`. It only reports; it never changes the data.
+
 </details>
 
 <details>

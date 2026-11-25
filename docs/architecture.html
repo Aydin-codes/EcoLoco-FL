@@ -1319,7 +1319,7 @@
       "row": 2.4,
       "what": "The University of South Florida's plant atlas: each species page shows whether it's native and a map of the Florida counties it's recorded in.",
       "how": [
-        "We store one species page link per recommended plant; the app opens it, it never downloads from it.",
+        "We store one species page link per recommended plant; the app opens it and never downloads from it. Only the fact-check script reads it.",
         "The team used these pages to check each plant (docs/plant-checklist.md)."
       ]
     },
@@ -1995,6 +1995,25 @@
         "Otherwise records the request and returns None.",
         "When more than 5,000 visitors are being tracked, forgets anyone not seen for a day.",
         "Each server process keeps its own counts, and they reset when the server restarts."
+      ]
+    },
+    {
+      "id": "facts_checker",
+      "label": "check_facts.py",
+      "layer": "data",
+      "status": "live",
+      "file": "backend/scripts/check_facts.py",
+      "symbol": "def check_plant(",
+      "col": 9,
+      "row": 5.6,
+      "what": "Re-checks the recommended plants against their live sources and writes docs/fact-check-report.md. It never edits the data.",
+      "how": [
+        "Opens every source link on each plant and reports any that don't load.",
+        "Splits each moisture and care \"basis\" into its labelled lines (\"Soils: …\", \"Drought Tolerance: …\") and checks each one appears word for word on its source page (spacing, case and curly quotes ignored).",
+        "For facts in our own words (helps, buying, watch out), checks that the animals and numbers they mention appear on that fact's source page.",
+        "Reads the plant's USF Atlas page for \"Status Native\", and the Atlas county list (`GetDistributionFIPSForSpecies`) for Palm Beach County (FIPS 12099).",
+        "Fetches each page once, one second apart, and writes a summary plus one row per plant listing anything a person should look at.",
+        "Run by hand: `venv\\Scripts\\python scripts/check_facts.py data/fl_recommendations.json ../docs/fact-check-report.md`."
       ]
     }
   ],
@@ -2897,6 +2916,17 @@
       "to": "s_rate_limit",
       "label": "retry_after((path, visitor), RATE_LIMITS[path])",
       "detail": "Called by limit_requests() before every route. None means go ahead; a number becomes the 429's Retry-After."
+    },
+    {
+      "from": "facts_checker",
+      "to": "d_recs",
+      "label": "reads the 30 plants and their sources"
+    },
+    {
+      "from": "facts_checker",
+      "to": "usf_atlas",
+      "label": "species page + county list per plant",
+      "detail": "GET /api/services/app/PlantSpecies/GetDistributionFIPSForSpecies?id=<species id> returns the county FIPS codes where the Atlas has wild specimens."
     }
   ]
 }</script>
