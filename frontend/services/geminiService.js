@@ -52,5 +52,5 @@ export async function getNearby(lat, lon) {
 }
 
 export function userMessage(err, fallback) {
-  return err?.status === 400 ? err.message : fallback;
+  return err?.status === 400 || err?.status === 429 ? err.message : fallback;
 }

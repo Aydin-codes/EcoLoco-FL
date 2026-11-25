@@ -1,7 +1,7 @@
 import pytest
 import requests
 
-from services import openai_client
+from services import openai_client, rate_limit
 
 
 @pytest.fixture(autouse=True)
@@ -17,3 +17,8 @@ def no_network(monkeypatch):
     monkeypatch.setattr(requests, "post", blocked)
     monkeypatch.setattr(requests, "get", blocked)
     monkeypatch.setattr(openai_client, "_client", ai_blocked)
+
+
+@pytest.fixture(autouse=True)
+def fresh_rate_limits():
+    rate_limit._hits.clear()

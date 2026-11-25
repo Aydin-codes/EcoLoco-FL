@@ -462,6 +462,7 @@
         "`load_dotenv()` reads `OPENAI_API_KEY` and `PLANTNET_API_KEY` from `backend/.env` when running locally. On Render they come from the service's environment settings.",
         "Creates the Flask app and turns on CORS so the Expo web build can call it.",
         "Registers eight POST routes: /identify, /names, /choose, /recommend, /plan, /locate, /nearby, /letter.",
+        "Before every route, `limit_requests()` checks `RATE_LIMITS` for that path (for example /identify: 30 a minute and 300 an hour per visitor; /letter: 10 a minute and 100 an hour). Over the limit it answers 429 \"Too many requests right now. Wait a minute and try again.\" with a `Retry-After` header. The visitor is told apart by Cloudflare's `CF-Connecting-IP` header (Render sits behind Cloudflare), or the direct address when running locally. CORS preflight requests aren't counted.",
         "Live on Render (`render.yaml`, service `ecoloco-api`) at https://api.ecoloco.app, started with gunicorn; each push to master redeploys it.",
         "`app.run(host='0.0.0.0')` with debug mode only when `ECOLOCO_DEV=1` (`debug_enabled()`); debug is off by default, so crashes never show the code-revealing debug page."
       ]
@@ -997,7 +998,7 @@
       "row": 9,
       "what": "Picks the error text a screen shows.",
       "how": [
-        "For a 400 from our server, shows the server's message (for example \"Florida only\").",
+        "For a 400 or 429 from our server, shows the server's message (for example \"Florida only\" or \"Too many requests right now. Wait a minute and try again.\").",
         "For anything else, shows the screen's own friendly message."
       ]
     },
@@ -1976,6 +1977,25 @@
         "Stops while the Home tab is hidden, scrolled past the hero, or the app is in the background.",
         "With reduce motion turned on it shows only the first line, with no cursor."
       ]
+    },
+    {
+      "id": "s_rate_limit",
+      "label": "retry_after()",
+      "layer": "svc",
+      "status": "live",
+      "file": "backend/services/rate_limit.py",
+      "symbol": "def retry_after(",
+      "col": 5,
+      "row": -0.6,
+      "what": "Counts each visitor's recent requests to a route and says whether they have to wait.",
+      "how": [
+        "Keeps the times of recent requests per (route, visitor) in memory; nothing is written to disk.",
+        "Drops times older than the longest window, then checks each rule (for example 30 in 60 seconds, 300 in an hour).",
+        "If any rule is full, returns how many seconds until the oldest counted request expires; the blocked request is not counted.",
+        "Otherwise records the request and returns None.",
+        "When more than 5,000 visitors are being tracked, forgets anyone not seen for a day.",
+        "Each server process keeps its own counts, and they reset when the server restarts."
+      ]
     }
   ],
   "edges": [
@@ -2871,6 +2891,12 @@
       "from": "home",
       "to": "ui_rotating",
       "label": "six catchphrases"
+    },
+    {
+      "from": "flask",
+      "to": "s_rate_limit",
+      "label": "retry_after((path, visitor), RATE_LIMITS[path])",
+      "detail": "Called by limit_requests() before every route. None means go ahead; a number becomes the 429's Retry-After."
     }
   ]
 }</script>

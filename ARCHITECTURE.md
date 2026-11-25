@@ -222,6 +222,7 @@ flowchart LR
     g30["location_service.py"]
     g38["name_search.py"]
     g40["photo_service.py"]
+    g42["rate_limit.py"]
   end
   subgraph L_data["Bundled data"]
     direction TB
@@ -314,7 +315,7 @@ flowchart LR
   class g0,g1,g2,g3,g4,g5 ui
   class g6 client
   class g7,g8,g9,g25,g31,g32,g36,g37 route
-  class g10,g11,g16,g18,g19,g20,g24,g26,g30,g38,g40 svc
+  class g10,g11,g16,g18,g19,g20,g24,g26,g30,g38,g40,g42 svc
   class g13,g14,g21,g22,g23,g27,g34,g35,g39,g41 data
   class g12,g15,g17,g28,g29,g33 ext
 ```

@@ -10,6 +10,7 @@ from services.ai_service import choose_plant, generate_letter, identify_plant
 from services.location_service import geocode, plantings_checked, reverse_zip, round_coords, seen_near, zip_center
 from services.name_search import common_name_for, is_known, search
 from services.plan_service import build_plan
+from services.rate_limit import retry_after
 
 load_dotenv()
 
@@ -21,6 +22,36 @@ CORS(app)
 
 def debug_enabled():
     return os.getenv("ECOLOCO_DEV") == "1"
+
+
+MINUTE, HOUR = 60, 60 * 60
+RATE_LIMITS = {
+    "/identify": [(30, MINUTE), (300, HOUR)],
+    "/choose": [(60, MINUTE)],
+    "/names": [(120, MINUTE)],
+    "/recommend": [(60, MINUTE)],
+    "/plan": [(60, MINUTE)],
+    "/locate": [(20, MINUTE)],
+    "/nearby": [(30, MINUTE)],
+    "/letter": [(10, MINUTE), (100, HOUR)],
+}
+TOO_MANY = "Too many requests right now. Wait a minute and try again."
+
+
+def _client_ip():
+    # Render sits behind Cloudflare, which overwrites this header with the visitor's real address.
+    return request.headers.get("CF-Connecting-IP") or request.remote_addr or "unknown"
+
+
+@app.before_request
+def limit_requests():
+    rules = RATE_LIMITS.get(request.path)
+    if request.method == "OPTIONS" or not rules:
+        return None
+    wait = retry_after((request.path, _client_ip()), rules)
+    if wait is None:
+        return None
+    return jsonify({"error": TOO_MANY}), 429, {"Retry-After": str(wait)}
 
 
 FLORIDA_ONLY = "EcoLoco's plant lists cover Florida only. Enter a Florida ZIP code."
