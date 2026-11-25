@@ -34,8 +34,6 @@
 
 EcoLoco is a phone app and website that tells you whether a plant is native, non-native or invasive, and shows the official source each answer came from. Check one plant or scan a whole yard, park or campus, and it builds a plan to swap invasive plants for native ones and drafts a letter you can send to whoever looks after the place.
 
-It's our entry for the 2026 Congressional App Challenge (FL-22). It started at the June 2026 USAII High School Hackathon as [HotCometGames/EcoLoco](https://github.com/HotCometGames/EcoLoco) and was rebuilt in October around real Florida plant data.
-
 | <img src="assets/readme/story/brazilian-pepper.jpg" alt="Brazilian pepper branch with clusters of red berries" width="250"> | <img src="assets/readme/story/coontie.jpg" alt="Coontie, a low fern-like Florida native plant" width="250"> | <img src="assets/readme/story/atala-butterfly.jpg" alt="A black Atala butterfly with blue spots and a red body, resting on coontie leaves" width="250"> |
 |:-:|:-:|:-:|
 | **Brazilian pepper** is invasive. It forms thickets that crowd out mangroves, pinelands and Everglades natives. | **Coontie** is a Florida native on the list of plants EcoLoco suggests adding to a campus. | **The Atala butterfly** lays its eggs only on coontie. It was once thought extinct in Florida. |
@@ -263,5 +261,7 @@ Found a plant with the wrong status, or a bug? [Open an issue](https://github.co
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+EcoLoco started at a June 2026 hackathon as [HotCometGames/EcoLoco](https://github.com/HotCometGames/EcoLoco) and was rebuilt in October 2026.
 
 <sub>Photos from iNaturalist: Brazilian pepper (c) Mary Keim, CC BY-NC-SA; coontie (c) Jenny Evans, CC BY-NC; Atala butterfly (c) Eridan Xharahi, CC BY. Icons from Microsoft Fluent Emoji and [Simple Icons](https://simpleicons.org). Bunny comic by [Chibird](https://chibird.com).</sub>
