@@ -36,7 +36,7 @@ EcoLoco is a phone app and website that tells you whether a plant is native, non
 
 | <img src="assets/readme/story/brazilian-pepper.jpg" alt="Brazilian pepper branch with clusters of red berries" width="250"> | <img src="assets/readme/story/coontie.jpg" alt="Coontie, a low fern-like Florida native plant" width="250"> | <img src="assets/readme/story/atala-butterfly.jpg" alt="A black Atala butterfly with blue spots and a red body, resting on coontie leaves" width="250"> |
 |:-:|:-:|:-:|
-| **Brazilian pepper** is invasive. It forms thickets that crowd out mangroves, pinelands and Everglades natives. | **Coontie** is a Florida native on the list of plants EcoLoco suggests adding to a campus. | **The Atala butterfly** lays its eggs only on coontie. It was once thought extinct in Florida. |
+| **Brazilian pepper** is invasive. It forms thickets that crowd out mangroves, pinelands and Everglades natives. | **Coontie** is a native plant EcoLoco suggests adding in its place. | **The Atala butterfly** lays its eggs only on coontie. It was once thought extinct in Florida. |
 
 ## Features
 
