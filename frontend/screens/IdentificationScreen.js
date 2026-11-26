@@ -32,6 +32,7 @@ import { useProgressText } from '../components/ProgressText';
 import LocationPicker from '../components/LocationPicker';
 import PressScale from '../components/PressScale';
 import PlantPhoto, { PhotoCredit } from '../components/PlantPhoto';
+import PlantQuestion from '../components/PlantQuestion';
 import Reveal from '../components/Reveal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { rememberPlace } from '../lastPlace';
@@ -355,6 +356,10 @@ export default function IdentificationScreen({ navigation }) {
                   </Reveal>
                 ))}
               </View>
+            )}
+
+            {shown && shown.status !== 'unknown' && zipCode.length === 5 && (
+              <PlantQuestion key={shown.scientific_name} scientificName={shown.scientific_name} status={shown.status} zipCode={zipCode} />
             )}
 
             {zipCode?.length === 5 && (

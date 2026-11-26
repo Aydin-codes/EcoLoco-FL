@@ -6,7 +6,7 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-from services.ai_service import choose_plant, generate_letter, identify_plant
+from services.ai_service import RECIPIENTS, choose_plant, generate_letter, identify_plant
 from services.ask_service import ask_about_plant
 from services.location_service import geocode, plantings_checked, reverse_zip, round_coords, seen_near, zip_center
 from services.name_search import common_name_for, is_known, search
@@ -225,6 +225,7 @@ def nearby():
 
 
 BAD_PLAN = "The plan is missing details. Make the plan again and retry."
+BAD_RECIPIENT = "Pick who the letter is for from the list."
 
 
 def _has_text(value, key="text"):
@@ -258,8 +259,11 @@ def letter():
         return jsonify({"error": FLORIDA_ONLY}), 400
     if not _valid_plan(plan):
         return jsonify({"error": BAD_PLAN}), 400
+    recipient = data.get("recipient", "principal")
+    if not isinstance(recipient, str) or recipient not in RECIPIENTS:
+        return jsonify({"error": BAD_RECIPIENT}), 400
     plan = dict(plan, add=[card for card in plan["add"] if card.get("in_letter") is not False])
-    result, ai_unavailable = generate_letter(plan, zip_code)
+    result, ai_unavailable = generate_letter(plan, zip_code, recipient)
     return jsonify({"result": result, "ai_unavailable": ai_unavailable})
 
 

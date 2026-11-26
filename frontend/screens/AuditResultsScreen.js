@@ -68,16 +68,27 @@ function NearbyRow({ plant, max, order }) {
   );
 }
 
+const RECIPIENTS = [
+  ['principal', 'School principal'],
+  ['hoa', 'HOA board'],
+  ['city', 'City or parks'],
+  ['landlord', 'Landlord'],
+  ['neighbor', 'Neighbor'],
+  ['other', 'Someone else'],
+];
+
 function LetterGenerator({ plan, zipCode, letter, onLetterChange, disabled, loading, onLoadingChange }) {
   const compact = useWindowDimensions().width < 360;
   const [copied,  setCopied]  = useState(false);
   const [error,   setError]   = useState(null);
+  const [recipient, setRecipient] = useState('principal');
+  const busy = loading || disabled;
 
   async function handleGenerate() {
     onLoadingChange(true);
     setError(null);
     try {
-      const data = await generateLetter(plan, zipCode);
+      const data = await generateLetter(plan, zipCode, recipient);
       onLetterChange(data.result);
       reportAi(data.ai_unavailable);
     } catch (err) {
@@ -89,16 +100,28 @@ function LetterGenerator({ plan, zipCode, letter, onLetterChange, disabled, load
 
   return (
     <View style={[styles.section, compact && styles.sectionCompact]}>
-      <Text accessibilityRole="header" style={styles.sectionTitle}>Letter to your principal</Text>
+      <Text accessibilityRole="header" style={styles.sectionTitle}>Write a letter</Text>
       <Text style={styles.sectionNote}>A draft from your plan. Change anything, or don't use it at all.</Text>
-      <TouchableOpacity accessibilityRole="button" style={[styles.btn, (loading || disabled) && styles.btnDisabled]} onPress={handleGenerate} disabled={loading || disabled}>
+      <Text style={styles.chipsLabel} nativeID="letter-recipient-label">Who is it for?</Text>
+      <View style={styles.chips} accessibilityRole="radiogroup" accessibilityLabelledBy="letter-recipient-label">
+        {RECIPIENTS.map(([key, label]) => {
+          const on = recipient === key;
+          return (
+            <TouchableOpacity key={key} accessibilityRole="radio" accessibilityState={{ checked: on, disabled: busy }} disabled={busy}
+              style={[styles.chip, on && styles.chipOn]} onPress={() => setRecipient(key)}>
+              <Text style={[styles.chipText, on && styles.chipTextOn]}>{label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+      <TouchableOpacity accessibilityRole="button" style={[styles.btn, busy && styles.btnDisabled]} onPress={handleGenerate} disabled={busy}>
         {loading ? <ActivityIndicator color={COLORS.cream} size="small" /> : <Text style={styles.btnText}>Write the letter</Text>}
       </TouchableOpacity>
       {error && <Text style={styles.errorText}>{error}</Text>}
       {letter ? (
         <View style={[styles.letterCard, compact && styles.letterCardCompact]}>
           <Text style={styles.sectionNote}>Tap to edit. Fill in the parts in [brackets].</Text>
-          <TextInput accessibilityLabel="Edit your letter to the principal" multiline scrollEnabled={false} value={letter} onChangeText={onLetterChange} editable={!disabled}
+          <TextInput accessibilityLabel="Edit your letter" multiline scrollEnabled={false} value={letter} onChangeText={onLetterChange} editable={!disabled}
             style={[styles.letterInput, compact && styles.letterInputCompact]} textAlignVertical="top" />
           <TouchableOpacity
             accessibilityRole="button"
@@ -499,6 +522,13 @@ const styles = StyleSheet.create({
   btnText:        { fontSize: TYPE.body, fontFamily: FONTS.bodyBold, color: COLORS.white },
   btnOutline:     { borderWidth: 1, borderColor: COLORS.border, backgroundColor: COLORS.cardBg, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 18, alignItems: 'center', marginTop: 12 },
   btnOutlineText: { fontSize: TYPE.body, lineHeight: LINE.body, fontFamily: FONTS.bodyBold, color: COLORS.darkGreen, textAlign: 'center' },
+
+  chipsLabel: { fontSize: TYPE.caption, lineHeight: LINE.caption, fontFamily: FONTS.bodyBold, color: COLORS.darkGreen, marginTop: 4 },
+  chips:      { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip:       { minHeight: 44, justifyContent: 'center', paddingHorizontal: 16, borderRadius: 22, borderWidth: 1, borderColor: COLORS.border, backgroundColor: COLORS.cardBg },
+  chipOn:     { backgroundColor: COLORS.darkGreen, borderColor: COLORS.darkGreen },
+  chipText:   { fontSize: TYPE.caption, fontFamily: FONTS.bodyBold, color: COLORS.darkGreen },
+  chipTextOn: { color: COLORS.white },
 
   letterCard: {
     marginTop: 12, backgroundColor: COLORS.cardBg, borderWidth: 1, borderColor: COLORS.border, borderRadius: 20, padding: 18, gap: 14,

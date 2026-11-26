@@ -39,8 +39,12 @@ export async function getPlantRecommendations(location, site = null) {
   return post('/recommend', { location, site });
 }
 
-export async function generateLetter(plan, zipCode) {
-  return post('/letter', { plan, zip_code: zipCode });
+export async function generateLetter(plan, zipCode, recipient = 'principal') {
+  return post('/letter', { plan, zip_code: zipCode, recipient });
+}
+
+export async function askAboutPlant(scientificName, question, location) {
+  return post('/ask', { scientific_name: scientificName, question, location });
 }
 
 export async function locate(place) {

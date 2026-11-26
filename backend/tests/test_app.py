@@ -362,3 +362,17 @@ def test_plan_shows_all_with_picked_extras(client):
 def test_plan_rejects_bad_show_all_options(client, body):
     response = client.post("/plan", json={"location": "33496", "plants": [], **body})
     assert response.status_code == 400
+
+
+def test_letter_for_a_landlord(client, monkeypatch):
+    _ai_down(monkeypatch)
+    response = client.post("/letter", json={"plan": _plan(client), "zip_code": "33139", "recipient": "landlord"})
+    assert response.status_code == 200
+    assert response.get_json()["result"].startswith("Dear [LANDLORD_NAME],")
+
+
+@pytest.mark.parametrize("recipient", ["mayor", 5, None, ""])
+def test_letter_refuses_unknown_recipients(client, recipient):
+    response = client.post("/letter", json={"plan": _plan(client), "zip_code": "33139", "recipient": recipient})
+    assert response.status_code == 400
+    assert response.get_json()["error"] == app_module.BAD_RECIPIENT

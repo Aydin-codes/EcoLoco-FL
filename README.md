@@ -46,7 +46,8 @@ EcoLoco is a phone app and website that tells you whether a plant is native, non
 - **Identify a plant**: take or upload up to 5 photos. Pl@ntNet names the plant, and EcoLoco says whether it's native, non-native or invasive.
 - **Scan an area**: add one card per plant, scan them all at once, and see what share of the area is native, counted by kind of plant and by every plant.
 - **Get a plan**: a removal card with safety notes for each invasive plant found, and native plants to add, each checked against its sources.
-- **Draft a letter**: an editable letter built from your plan, with sources, asking for the change.
+- **Ask about a plant**: tap a suggested question or type your own, like "Is it safe for my dog?". Every sentence of the answer shows the source it came from.
+- **Draft a letter**: an editable letter built from your plan, with sources, asking for the change. Pick who it's for: a school principal, an HOA board, the city or parks department, a landlord, a neighbor, or someone else.
 - **Save audits**: keep separate audits for different areas on your device.
 
 ## How it works
@@ -130,6 +131,7 @@ If you already know the plant, you can skip the photos: press "Know its name? Ch
 - One line on why it matters (for example, coontie is the only plant the Atala butterfly can lay its eggs on), with where that line came from in small text underneath
 - For plants in our data: which animals it helps and what to watch out for (for example, coontie seeds are poisonous to pets), each with its source, and a "See where it grows" button that opens that plant's USF Atlas page inside the app
 - For invasive plants: how to remove them safely (Brazilian pepper is in the poison ivy family, so an adult should do the cutting)
+- An "Ask about this plant" box with three suggested questions, or type your own. The answer comes only from that plant's facts, and each sentence shows its source. If the facts don't answer it, the box says so and lists everything we know about the plant instead
 - If the AI part is down, a small notice says "Extra descriptions are offline. Plant names and Florida status still work."
 
 **After you scan a whole campus (the EcoScan tab):**
@@ -148,7 +150,7 @@ If you already know the plant, you can skip the photos: press "Know its name? Ch
 - A photo of each plant on the results, the plan cards and Identify, with the photographer's credit. The photos come from iNaturalist and are only used when their license allows it
 - A short "Why this matters" section: four facts about native plants, birds, water and flooding, each with its source
 - An "In my letter" checkbox on each plant to add. Untick one to leave it out of the letter and the "with the plan" numbers
-- An editable letter to your principal listing the plants to remove and add, how to buy them, safety notes, the percent native now and with the plan (and the percent by kind of plant when it is different), and sources
+- A "Who is it for?" choice (school principal, HOA board, city or parks, landlord, neighbor, someone else), then an editable letter to them listing the plants to remove and add, how to buy them, safety notes, the percent native now and with the plan (and the percent by kind of plant when it is different), and sources
 
 **Saving separate audits:**
 
@@ -178,9 +180,9 @@ If you already know the plant, you can skip the photos: press "Know its name? Ch
 4. **Counting.** The app counts how many scanned plants are in each group and divides the natives by the plants it could identify. No AI is involved, and the name a plant was scanned under doesn't change the result: "Coontie", "coontie" and "Zamia integrifolia" all count the same. It also counts each kind of plant once, so two coonties and one Brazilian pepper are 67% native by plants but 50% by kinds. The "with the plan" percents only count changes the plan really makes: invasive plants that have a ready replacement, and the native plants it adds.
 5. **The plan.** Plants to add come only from our list of about 30 South Florida natives. Each invasive plant found gets a replacement. The other picks fill gaps on campus: none of the plant groups that feed the most caterpillars here (from the National Wildlife Federation), nothing caterpillars eat, no fruit for birds, or months with nothing blooming. The first three picks include at most one tree and at least one easy plant. Plant-group counts like "Oaks feed 395 kinds of caterpillars here" are always for the whole group, and are never added together.
 6. **Your location.** A typed address or ZIP, or your rounded location, is turned into a ZIP code using OpenStreetMap's free Nominatim service (no more than one request a second, as its rules ask). The ZIP's county comes from a table of every Florida ZIP code built from the 2020 Census; a ZIP the table doesn't know (like a PO box) is treated as outside Palm Beach County. The same rounded location is used to ask iNaturalist which plants have been seen nearby. Neither is stored.
-7. **The letter.** The letter is built from the plan. OpenAI may only reword the opening paragraph, and its version is thrown away if it adds a plant or animal name, or changes a number. Without OpenAI, the letter still works.
+7. **The letter.** The letter is built from the plan. Each kind of reader gets its own greeting, request and sign-off, with blanks like [LANDLORD_NAME] to fill in. OpenAI may only reword the opening paragraph for that reader, and its version is thrown away if it adds a plant or animal name, changes a number, or drops a blank. Without OpenAI, the letter still works.
 8. **Fair use.** Each visitor can only send so many requests in a row (for example 30 plant identifications a minute, enough for a whole class on one school network). Past that, the app says "Too many requests right now. Wait a minute and try again." This keeps one person from using up the free Pl@ntNet allowance or the OpenAI budget.
-9. **Questions about a plant (server side only, no button in the app yet).** The server can answer a question like "Is it safe for my dog?" about one plant. It gathers that plant's facts from our data, each with its source, and OpenAI may answer only from them. Every sentence must say which fact it came from. A sentence is thrown away if it doesn't, or if it names a plant, animal or number those facts don't, turns a fact around with "not", or calls something safe or edible when the facts don't say so. Only plants on our Florida plant list can be asked about, and the server answers at most 1,000 questions a day in total. If nothing is left, or the AI is down, the app gets the plant's facts to show instead.
+9. **Questions about a plant.** The "Ask about this plant" box on the Identify screen can answer a question like "Is it safe for my dog?" about one plant. It gathers that plant's facts from our data, each with its source, and OpenAI may answer only from them. Every sentence must say which fact it came from. A sentence is thrown away if it doesn't, or if it names a plant, animal or number those facts don't, turns a fact around with "not", or calls something safe or edible when the facts don't say so. Only plants on our Florida plant list can be asked about, and the server answers at most 1,000 questions a day in total. If nothing is left, or the AI is down, the app shows the plant's facts instead.
 
 The invasive list is generated straight from the official FISC PDF by a script in `backend/scripts/`, so it matches the published list.
 
@@ -258,7 +260,6 @@ Each list in `backend/data/` that comes from an outside source can be rebuilt fr
 - Our own native list covers 21 South Florida plants. A plant that isn't on our lists or Florida's invasive list is checked against USDA PLANTS, and if USDA doesn't know it (or can't be reached), it's shown as unknown instead of guessed.
 - The phone version runs through the Expo Go app. The website works on any phone or computer.
 - Saved audits stay on the device or browser they were made on.
-- The letter is written for a school principal.
 
 <p align="center"><img src="https://user-images.githubusercontent.com/74038190/236544207-c4f427b3-be04-4cfe-a3d2-2eabb0d2de73.gif" alt="A pink bunny comic: progress isn't linear, it's okay if you get stuck or fall back, just keep moving forward" width="280"></p>
 

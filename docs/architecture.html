@@ -377,10 +377,11 @@
       "symbol": "function LetterGenerator",
       "col": 2,
       "row": 6.4,
-      "what": "Writes an editable letter to the principal from the whole plan.",
+      "what": "Writes an editable letter from the whole plan to the person the user picks.",
       "how": [
-        "\"Write the letter\" calls `generateLetter(plan, zipCode)`; there are no checkboxes, the letter covers the whole plan.",
-        "Shows the letter in an editable box with [PRINCIPAL_NAME], [SCHOOL_NAME] and [STUDENT_NAME] to fill in.",
+        "\"Who is it for?\" chips: School principal, HOA board, City or parks, Landlord, Neighbor, Someone else (principal by default).",
+        "\"Write the letter\" calls `generateLetter(plan, zipCode, recipient)`; the letter covers the whole plan minus unticked plants.",
+        "Shows the letter in an editable box with the blanks in [brackets] to fill in, like [PRINCIPAL_NAME] or [LANDLORD_NAME].",
         "Copy writes the edited text with `Clipboard.setStringAsync` and shows 'Copied' for 2 seconds.",
         "Errors show as text under the button."
       ]
@@ -442,9 +443,9 @@
       "col": 3,
       "row": 6.4,
       "goal": "File becomes apiClient.js, since it calls our Flask API, not Gemini.",
-      "what": "Asks the backend to write the letter to the school admin.",
+      "what": "Asks the backend to write the letter for the chosen recipient.",
       "how": [
-        "POSTs `{plan, zip_code}` to `/letter`.",
+        "POSTs `{plan, zip_code, recipient}` to `/letter`.",
         "Returns `{result: letter text, ai_unavailable}`."
       ]
     },
@@ -508,12 +509,12 @@
       "symbol": "def letter(",
       "col": 4,
       "row": 6.4,
-      "what": "API endpoint for the letter to the school admin.",
+      "what": "API endpoint for the letter.",
       "how": [
-        "Reads `plan` and `zip_code`; 400 if missing or the ZIP is outside Florida.",
+        "Reads `plan`, `zip_code` and optional `recipient` (principal, hoa, city, landlord, neighbor or other; principal if left out); 400 if missing, the ZIP is outside Florida, or the recipient isn't one of those.",
         "Checks the plan's shape: remove cards need a name and removal safety text, add cards need a name, what it helps (with a source) and the name to ask for; otherwise \"The plan is missing details. Make the plan again and retry.\"",
         "Leaves out Add cards marked `in_letter: false`, so unticked plants never reach the letter.",
-        "Calls `generate_letter(plan, zip_code)` and returns `{result: letter text, ai_unavailable}`."
+        "Calls `generate_letter(plan, zip_code, recipient)` and returns `{result: letter text, ai_unavailable}`."
       ]
     },
     {
@@ -544,11 +545,12 @@
       "symbol": "def generate_letter(",
       "col": 5,
       "row": 6.4,
-      "what": "Writes the letter to the principal from the plan. OpenAI may only reword the opening paragraph.",
+      "what": "Writes the letter for the chosen recipient from the plan. OpenAI may only reword the opening paragraph, which holds the ask.",
       "how": [
-        "Builds the opening paragraph from the plan's percentages.",
-        "Asks OpenAI to reword only that paragraph, with a system prompt: about a 7th-grade reading level, everyday words, add no plant, animal, place, number or fact, keep every number.",
-        "Keeps the AI's version only if `mentions_new_names()` finds nothing new and the numbers are unchanged; otherwise keeps ours.",
+        "Looks up the recipient in `RECIPIENTS`: its greeting, who checked what, the ask, the closing and the sign-off. The principal letter is from the school eco-club (\"we\"); the others are from one person (\"I\").",
+        "Builds the opening paragraph from those and the plan's percentages.",
+        "Asks OpenAI to reword only that paragraph for that reader, with a system prompt: about a 7th-grade reading level, everyday words, add no plant, animal, place, number or fact, keep every number and every [BLANK].",
+        "Keeps the AI's version only if `mentions_new_names()` finds nothing new, the numbers are unchanged and every [BLANK] is still there; otherwise keeps ours.",
         "Everything else comes from `letter_facts()`: removals with safety notes, plants to add with buying info, and sources.",
         "Returns `(letter, ai_unavailable)`."
       ]
@@ -1029,10 +1031,11 @@
       "row": 8.8,
       "what": "The letter built only from our data, with no AI. Also used when the AI is down.",
       "how": [
-        "Opening: the ZIP and \"Of the plants we checked, X% are native to Florida.\", plus \"With these changes, it would be Y%.\" only when the plan changes the number, and \"Counting each kind of plant once, Z% are native now.\" only when that differs from X.",
-        "\"What we'd like to remove\": each invasive with its why and safety note.",
-        "\"What we'd like to plant\": each Add card with what it helps and \"Buying it: ask for …\" plus look-alikes to avoid.",
-        "\"Sources\": every source used, with links."
+        "Opening: the recipient's line about who checked the plants, the ZIP and \"Of the plants we checked, X% are native to Florida.\", plus \"With these changes, it would be Y%.\" only when the plan changes the number, and \"Counting each kind of plant once, Z% are native now.\" only when that differs from X.",
+        "\"What we'd (or I'd) like to remove\": each invasive with its why and safety note.",
+        "\"What we'd (or I'd) like to plant\": each Add card with what it helps and \"Buying it: ask for …\" plus look-alikes to avoid.",
+        "\"Sources\": every source used, with links.",
+        "Starts with the recipient's greeting and ends with its closing and sign-off."
       ]
     },
     {
@@ -2021,15 +2024,15 @@
       "id": "c_ask",
       "label": "askAboutPlant()",
       "layer": "client",
-      "status": "planned",
+      "status": "live",
       "file": "frontend/services/geminiService.js",
       "symbol": "export async function askAboutPlant",
       "col": 3,
       "row": 12.8,
-      "goal": "Ask box on plant results (Identify and plan cards): type a question, see the cited answer or the plant's records. Waiting for Aydin's design review.",
-      "what": "Will send a question about one plant to POST /ask.",
+      "what": "Sends a question about one plant to the backend.",
       "how": [
-        "POST /ask {scientific_name, question, location} and show each answer sentence with its sources, or the records when there's no answer."
+        "POSTs `{scientific_name, question, location}` to `/ask`.",
+        "Returns `{result: {plant_name, records, answer, dropped, ai_unavailable, message}}`."
       ]
     },
     {
@@ -2041,7 +2044,7 @@
       "symbol": "def ask(",
       "col": 4,
       "row": 12.8,
-      "what": "API endpoint for a question about one plant. No screen calls it yet.",
+      "what": "API endpoint for a question about one plant, called by the Ask box on Identify.",
       "how": [
         "Reads `scientific_name`, `question` and `location` from a JSON object (anything else counts as empty); 400 if the name is missing or over 100 characters, the ZIP is outside Florida, the name isn't on our Florida plant list (`is_known()`), or the question isn't 3 to 200 characters.",
         "Rate limited to 20 a minute and 200 an hour per visitor, and 1,000 a day for everyone together.",
@@ -2117,6 +2120,24 @@
         "An IPv4 address is used as is.",
         "An IPv6 address becomes its /64 block, since one visitor usually controls a whole /64 and could otherwise get a fresh limit per address.",
         "Anything unreadable or missing counts as \"unknown\"."
+      ]
+    },
+    {
+      "id": "ui_ask",
+      "label": "PlantQuestion",
+      "layer": "ui",
+      "status": "live",
+      "file": "frontend/components/PlantQuestion.js",
+      "symbol": "export default function PlantQuestion",
+      "col": 2,
+      "row": 1.4,
+      "what": "The \"Ask about this plant\" box under an identified plant: answers come only from our records, each sentence with its source.",
+      "how": [
+        "Shown on Identify for any plant whose status is known, once there's a Florida ZIP.",
+        "Three suggested questions to tap (for invasives: why it's a problem, removing it safely, pets; otherwise: wildlife, size, pets), or type your own (3 to 200 characters).",
+        "Calls `askAboutPlant(name, question, zip)` and shows each answer sentence with a green bar and its Source line(s).",
+        "When there's no answer or the AI is down, shows the message and every record we have about the plant, each with its source.",
+        "Errors (including \"Too many requests\") show under the box."
       ]
     }
   ],
@@ -2246,7 +2267,7 @@
     {
       "from": "letter",
       "to": "c_letter",
-      "label": "generateLetter(plan, zipCode)"
+      "label": "generateLetter(plan, zipCode, recipient)"
     },
     {
       "from": "c_identify",
@@ -2263,7 +2284,7 @@
     {
       "from": "c_letter",
       "to": "r_letter",
-      "label": "POST /letter {plan, zip_code}",
+      "label": "POST /letter {plan, zip_code, recipient}",
       "detail": "Returns {result: letter text, ai_unavailable}."
     },
     {
@@ -2289,7 +2310,7 @@
     {
       "from": "r_letter",
       "to": "s_letter",
-      "label": "generate_letter(plan, zip_code)"
+      "label": "generate_letter(plan, zip_code, recipient)"
     },
     {
       "from": "s_letter",
@@ -2481,7 +2502,7 @@
     {
       "from": "s_letter",
       "to": "s_letter_facts",
-      "label": "letter_facts(plan, zip) → template text"
+      "label": "letter_facts(plan, zip, recipient) → template text"
     },
     {
       "from": "s_letter",
@@ -3034,8 +3055,7 @@
     {
       "from": "c_ask",
       "to": "r_ask",
-      "label": "POST /ask {scientific_name, question, location}",
-      "status": "planned"
+      "label": "POST /ask {scientific_name, question, location}"
     },
     {
       "from": "flask",
@@ -3096,6 +3116,26 @@
       "from": "flask",
       "to": "s_visitor_key",
       "label": "visitor_key(CF-Connecting-IP or remote_addr)"
+    },
+    {
+      "from": "ident",
+      "to": "ui_ask",
+      "label": "renders PlantQuestion {scientificName, status, zipCode}"
+    },
+    {
+      "from": "ui_ask",
+      "to": "c_ask",
+      "label": "askAboutPlant(name, question, zip)"
+    },
+    {
+      "from": "ui_ask",
+      "to": "ui_receipt",
+      "label": "Source: … under each sentence"
+    },
+    {
+      "from": "ui_ask",
+      "to": "ui_ai_unknown",
+      "label": "reportAi(result.ai_unavailable)"
     }
   ]
 }</script>

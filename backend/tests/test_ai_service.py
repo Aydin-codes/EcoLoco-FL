@@ -137,7 +137,7 @@ def rephrase(monkeypatch):
     state = {"reply": None, "system": None}
 
     def fake_chat(content, json_reply=False, system=None):
-        state["system"] = system
+        state["system"], state["prompt"] = system, content
         if isinstance(state["reply"], Exception):
             raise state["reply"]
         return state["reply"] if state["reply"] is not None else content.split("\n\n", 1)[1]
@@ -247,3 +247,31 @@ def test_letter_gives_the_kinds_percent_when_it_differs(rephrase):
     same = dict(plan, summary=dict(plan["summary"], percent_native_kinds=75))
     letter, _ = ai_service.generate_letter(same, ZIP)
     assert "Counting each kind" not in letter
+
+
+@pytest.mark.parametrize("recipient", sorted(ai_service.RECIPIENTS))
+def test_every_recipient_gets_a_full_letter(plan, rephrase, recipient):
+    letter, _ = ai_service.generate_letter(plan, ZIP, recipient)
+    r = ai_service.RECIPIENTS[recipient]
+    assert letter.startswith(r["greeting"]) and letter.endswith(r["signoff"])
+    assert "Brazilian pepper" in letter and "Sources" in letter
+    assert r["audience"] in rephrase["prompt"]
+
+
+def test_one_person_letters_say_i_not_we(plan, rephrase):
+    letter, _ = ai_service.generate_letter(plan, ZIP, "hoa")
+    assert "Of the plants I checked" in letter and "What I'd like to remove:" in letter
+    assert "eco-club" not in letter.lower() and "principal" not in letter.lower()
+
+
+def test_principal_letter_is_unchanged_by_default(plan, rephrase):
+    assert ai_service.letter_facts(plan, ZIP) == ai_service.letter_facts(plan, ZIP, "principal")
+    assert ai_service.letter_facts(plan, ZIP).startswith("Dear [PRINCIPAL_NAME],")
+
+
+def test_letter_rejects_ai_text_that_drops_a_blank(plan, rephrase):
+    opening = ai_service.letter_facts(plan, ZIP).split("\n\n")[1]
+    rephrase["reply"] = opening.replace("[SCHOOL_NAME]", "Lincoln High")
+    letter, _ = ai_service.generate_letter(plan, ZIP)
+    assert "Lincoln High" not in letter
+    assert "[SCHOOL_NAME] eco-club" in letter

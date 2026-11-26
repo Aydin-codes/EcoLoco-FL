@@ -175,7 +175,6 @@ The `graph-data` JSON block in `docs/architecture.html` is the single source of 
 | `get_status()` (backend/services/fl_plants_service.py) | change planned | Add ZIP-specific regional lists behind the same get_status(). |
 | `fisc_list.json` (backend/data/fisc_list.json) | change planned | Verify the 22 curated "why" lines against FISC / UF-IFAS, the way the 30 recommended plants were checked. |
 | `fl_natives.json` (backend/data/fl_natives.json) | change planned | Verify every entry against UF/IFAS and the Atlas of Florida Plants, the way the 30 recommended plants were checked. |
-| `askAboutPlant()` (frontend/services/geminiService.js) | PLANNED | Ask box on plant results (Identify and plan cards): type a question, see the cited answer or the plant's records. Waiting for Aydin's design review. |
 <!-- /GENERATED:planned -->
 
 ### Diagram
@@ -198,7 +197,6 @@ flowchart LR
   subgraph L_client["API client"]
     direction TB
     g6["geminiService.js"]
-    g43["askAboutPlant()<br/>PLANNED: Ask box on plant results (Identify and plan cards): type a question, see the cited answer or the plant's records. Waiting for Aydin's design review."]
   end
   subgraph L_route["Flask routes"]
     direction TB
@@ -210,7 +208,7 @@ flowchart LR
     g32["POST /nearby"]
     g36["POST /names"]
     g37["POST /choose"]
-    g44["POST /ask"]
+    g43["POST /ask"]
   end
   subgraph L_svc["Services"]
     direction TB
@@ -226,7 +224,7 @@ flowchart LR
     g38["name_search.py"]
     g40["photo_service.py"]
     g42["rate_limit.py"]
-    g45["ask_service.py"]
+    g44["ask_service.py"]
   end
   subgraph L_data["Bundled data"]
     direction TB
@@ -257,6 +255,7 @@ flowchart LR
   g3 --> g6
   g4 --> g6
   g4 --> g33
+  g6 --> g43
   g6 --> g37
   g6 --> g36
   g6 --> g32
@@ -307,15 +306,14 @@ flowchart LR
   g37 --> g38
   g38 --> g39
   g40 --> g41
-  g43 -.-> g44
-  g44 --> g45
-  g45 --> g26
-  g45 --> g22
-  g45 --> g21
-  g45 --> g13
-  g45 --> g19
-  g45 --> g11
-  g45 --> g12
+  g43 --> g44
+  g44 --> g26
+  g44 --> g22
+  g44 --> g21
+  g44 --> g13
+  g44 --> g19
+  g44 --> g11
+  g44 --> g12
   classDef ui fill:#e3f2e1,stroke:#2e7d32,color:#12301a
   classDef device fill:#eceff1,stroke:#607d8b,color:#263238
   classDef client fill:#e1effa,stroke:#1e6fb8,color:#0d2d4d
@@ -326,11 +324,10 @@ flowchart LR
   classDef planned stroke-dasharray:6 4,stroke-width:2px
   classDef dead fill:#f3f3f3,stroke:#9e9e9e,color:#616161,stroke-dasharray:3 3
   class g0,g1,g2,g3,g4,g5 ui
-  class g6,g43 client
-  class g7,g8,g9,g25,g31,g32,g36,g37,g44 route
-  class g10,g11,g16,g18,g19,g20,g24,g26,g30,g38,g40,g42,g45 svc
+  class g6 client
+  class g7,g8,g9,g25,g31,g32,g36,g37,g43 route
+  class g10,g11,g16,g18,g19,g20,g24,g26,g30,g38,g40,g42,g44 svc
   class g13,g14,g21,g22,g23,g27,g34,g35,g39,g41 data
   class g12,g15,g17,g28,g29,g33 ext
-  class g43 planned
 ```
 <!-- /GENERATED:mermaid -->
