@@ -30,7 +30,7 @@
 <p align="center"><sub>Home, identifying one plant, a campus scan's results, and the plan for removing an invasive plant. Screenshots from ecoloco.app at iPhone size.</sub></p>
 
 <p align="center"><img src="assets/readme/demo.gif" alt="Screen recording: a Brazilian pepper photo is identified as invasive, a coontie photo as native, and the campus native score updates" width="280"></p>
-<p align="center"><sub>A Brazilian pepper comes back invasive, a coontie comes back native, and the campus score updates. Recorded on an iPhone. Note: The UI might look different as this was recorded during the early development periods. </sub></p>
+<p align="center"><sub>A Brazilian pepper comes back invasive, a coontie comes back native, and the campus score updates. Recorded on an iPhone. Note: Note: This was recorded early in development, so the UI may look different now. </sub></p>
 
 ## What it is
 
